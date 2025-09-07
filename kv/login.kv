@@ -1,0 +1,65 @@
+<LoginScreen>:
+    canvas.before:
+        Color:
+            rgba: 0.05, 0.05, 0.05, 1  # Fondo casi negro
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20) if is_mobile else dp(50)
+        spacing: dp(15) if is_mobile else dp(20)
+        
+        MDLabel:
+            text: 'INICIAR SESIÓN'
+            halign: 'center'
+            font_style: "H5" if is_mobile else "H4"
+            theme_text_color: "Custom"
+            text_color: 0.8, 0.1, 0.1, 1  # Rojo sangre
+            size_hint_y: None
+            height: self.texture_size[1]
+            
+        Widget:
+            size_hint_y: 0.05
+            
+        MDTextField:
+            id: username
+            hint_text: "Nombre de usuario"
+            size_hint_x: 0.9 if is_mobile else 0.8
+            pos_hint: {"center_x": 0.5}
+            font_size: dp(16) if is_mobile else dp(14)
+            
+        MDTextField:
+            id: password
+            hint_text: "Contraseña"
+            password: True
+            size_hint_x: 0.9 if is_mobile else 0.8
+            pos_hint: {"center_x": 0.5}
+            font_size: dp(16) if is_mobile else dp(14)
+            
+        Widget:
+            size_hint_y: 0.05
+            
+        MDRaisedButton:
+            text: "INICIAR SESIÓN"
+            pos_hint: {"center_x": 0.5}
+            size_hint_x: 0.8 if is_mobile else 0.4
+            height: dp(50) if is_mobile else dp(40)
+            md_bg_color: 0.5, 0, 0, 1  # Rojo oscuro
+            on_release: app.root.get_screen('login').login_user()
+            
+        MDRaisedButton:
+            text: '¿NO TIENES CUENTA? REGÍSTRATE'
+            pos_hint: {"center_x": 0.5}
+            adaptive_size: True
+            height: dp(50) if is_mobile else dp(40)
+            md_bg_color: 0.5, 0, 0, 1  # Rojo oscuro
+            on_release: app.root.current = 'register'
+            
+        MDRaisedButton:
+            text: 'VOLVER'
+            pos_hint: {"center_x": 0.5}
+            size_hint_x: 0.8 if is_mobile else 0.4
+            height: dp(50) if is_mobile else dp(40)
+            md_bg_color: 0.5, 0, 0, 1  # Rojo oscuro
+            on_release: app.root.current = 'MenuScreen'

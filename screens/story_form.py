@@ -10,8 +10,11 @@ from kivymd.uix.menu import MDDropdownMenu  # Menú desplegable para categorías
 from models.story import StoryManager   # Gestor de historias
 from models.user import SessionManager # Gestor de sesión
 
+# Categorías actualizadas con temática de terror
 CATEGORIES = [
-    'Norte', 'Centro', 'Sur', 'Isla de Pascua', 'Patagonia', 'Desconocida'
+    'Apariciones', 'Casas Embrujadas', 'Cementerios', 'Posesiones', 
+    'Rituales', 'Leyendas Urbanas', 'Hospitales/Sanatorios', 'Carreteras', 
+    'Bosques/Montañas', 'Entidades Demoníacas'
 ]
 
 class StoryFormScreen(MDScreen):
@@ -34,7 +37,9 @@ class StoryFormScreen(MDScreen):
             self.menu = MDDropdownMenu(
                 caller=field,
                 items=[{'text': c, 'on_release': lambda x=c: self.set_category(x)} for c in CATEGORIES],
-                width_mult=4
+                width_mult=4,
+                background_color=[0.1, 0.1, 0.1, 1],  # Fondo oscuro
+                radius=[10, 10, 10, 10],  # Bordes redondeados
             )
         self.menu.open()
 

@@ -1,0 +1,71 @@
+<RegisterScreen>:
+    # Fondo oscuro para la pantalla de registro
+    canvas.before:
+        Color:
+            rgba: 0.05, 0.05, 0.05, 1  # Fondo casi negro
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    
+    # Contenedor principal vertical
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20) if is_mobile else dp(50)
+        spacing: dp(15) if is_mobile else dp(20)
+        
+        # Título de la pantalla
+        MDLabel:
+            text: 'REGISTRO'
+            halign: 'center'
+            font_style: "H5" if is_mobile else "H4"
+            theme_text_color: "Custom"
+            text_color: 0.8, 0.1, 0.1, 1  # Rojo sangre
+            size_hint_y: None
+            height: self.texture_size[1]
+            
+        # Campo de nombre de usuario
+        MDTextField:
+            id: username
+            hint_text: "Nombre de usuario"
+            size_hint_x: 0.9 if is_mobile else 0.8
+            pos_hint: {"center_x": 0.5}
+            font_size: dp(16) if is_mobile else dp(14)
+            
+        # Campo de correo electrónico
+        MDTextField:
+            id: email
+            hint_text: "Correo electrónico"
+            size_hint_x: 0.9 if is_mobile else 0.8
+            pos_hint: {"center_x": 0.5}
+            font_size: dp(16) if is_mobile else dp(14)
+            
+        # Campo de contraseña
+        MDTextField:
+            id: password
+            hint_text: "Contraseña"
+            password: True
+            size_hint_x: 0.9 if is_mobile else 0.8
+            pos_hint: {"center_x": 0.5}
+            font_size: dp(16) if is_mobile else dp(14)
+            
+        # Espacio flexible
+        Widget:
+            size_hint_y: 0.05
+            
+        # Botón para registrarse
+        MDRaisedButton:
+            text: "REGISTRARSE"
+            pos_hint: {"center_x": 0.5}
+            size_hint_x: 0.8 if is_mobile else 0.4
+            height: dp(50) if is_mobile else dp(40)
+            md_bg_color: 0.5, 0, 0, 1  # Rojo oscuro
+            on_release: app.root.get_screen('register').register_user()
+            
+        # Botón para volver
+        MDRaisedButton:
+            text: 'VOLVER'
+            pos_hint: {"center_x": 0.5}
+            size_hint_x: 0.8 if is_mobile else 0.4
+            height: dp(50) if is_mobile else dp(40)
+            md_bg_color: 0.5, 0, 0, 1  # Rojo oscuro
+            on_release: app.root.current = 'MenuScreen'

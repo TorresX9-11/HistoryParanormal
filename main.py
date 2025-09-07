@@ -1,5 +1,5 @@
 """
-Archivo principal de la aplicación History Paranormal Chile.
+Archivo principal de la aplicación Sombras de Chile.
 Contiene la definición de la app, carga de pantallas y layouts, y el ciclo principal.
 """
 from kivy.lang import Builder
@@ -19,147 +19,7 @@ class MenuScreen(MDScreen):
     """
     pass
 
-KV = '''
-    # Definición de la interfaz gráfica en lenguaje KV
-MDScreenManager:
-    MenuScreen:
-    RegisterScreen:
-    LoginScreen:
-    PublicScreen:
-    UserPanelScreen:
-    StoryFormScreen:
-
-<MenuScreen@MDScreen>:
-    MDLabel:
-        text: 'Bienvenido a History Paranormal Chile'
-        halign: 'center'
-        pos_hint: {"center_y": 0.7}
-    MDRaisedButton:
-        text: 'Ver publicaciones'
-        pos_hint: {"center_x": 0.5, "center_y": 0.5}
-        on_release: app.root.current = 'public'
-    MDRaisedButton:
-        text: 'Iniciar sesión'
-        pos_hint: {"center_x": 0.5, "center_y": 0.4}
-        on_release: app.root.current = 'login'
-
-<PublicScreen>:
-    BoxLayout:
-        orientation: 'vertical'
-        ScrollView:
-            MDList:
-                id: stories_list
-        MDRaisedButton:
-            text: 'Volver'
-            pos_hint: {"center_x": 0.5}
-            on_release: app.root.current = 'MenuScreen'
-
-<RegisterScreen>:
-    BoxLayout:
-        orientation: 'vertical'
-        MDTextField:
-            id: username
-            hint_text: "Nombre de usuario"
-            size_hint_x: 0.8
-            pos_hint: {"center_x": 0.5}
-        MDTextField:
-            id: email
-            hint_text: "Correo electrónico"
-            size_hint_x: 0.8
-            pos_hint: {"center_x": 0.5}
-        MDTextField:
-            id: password
-            hint_text: "Contraseña"
-            password: True
-            size_hint_x: 0.8
-            pos_hint: {"center_x": 0.5}
-        MDRaisedButton:
-            text: "Registrarse"
-            pos_hint: {"center_x": 0.5}
-            on_release: app.root.get_screen('register').register_user()
-        MDRaisedButton:
-            text: 'Volver'
-            pos_hint: {"center_x": 0.5}
-            on_release: app.root.current = 'MenuScreen'
-
-<LoginScreen>:
-    BoxLayout:
-        orientation: 'vertical'
-        MDTextField:
-            id: username
-            hint_text: "Nombre de usuario"
-            size_hint_x: 0.8
-            pos_hint: {"center_x": 0.5}
-        MDTextField:
-            id: password
-            hint_text: "Contraseña"
-            password: True
-            size_hint_x: 0.8
-            pos_hint: {"center_x": 0.5}
-        MDRaisedButton:
-            text: "Iniciar sesión"
-            pos_hint: {"center_x": 0.5}
-            on_release: app.root.get_screen('login').login_user()
-        MDRaisedButton:
-            text: '¿No tienes cuenta? Regístrate'
-            pos_hint: {"center_x": 0.5}
-            on_release: app.root.current = 'register'
-        MDRaisedButton:
-            text: 'Volver'
-            pos_hint: {"center_x": 0.5}
-            on_release: app.root.current = 'MenuScreen'
-
-<UserPanelScreen>:
-    BoxLayout:
-        orientation: 'vertical'
-        MDLabel:
-            text: 'Historias Paranormales de Chile'
-            halign: 'center'
-        ScrollView:
-            MDList:
-                id: user_stories_list
-        MDRaisedButton:
-            text: 'Mis historias'
-            pos_hint: {"center_x": 0.5}
-            on_release: app.root.get_screen('userpanel').show_my_stories()
-        MDRaisedButton:
-            text: 'Crear nueva historia'
-            pos_hint: {"center_x": 0.5}
-            on_release: app.root.get_screen('userpanel').open_story_form()
-        MDRaisedButton:
-            text: 'Volver'
-            pos_hint: {"center_x": 0.5}
-            on_release: app.root.current = 'MenuScreen'
-
-<StoryFormScreen>:
-    BoxLayout:
-        orientation: 'vertical'
-        MDTextField:
-            id: title
-            hint_text: "Título de la historia"
-            size_hint_x: 0.8
-            pos_hint: {"center_x": 0.5}
-        MDTextField:
-            id: content
-            hint_text: "Relato"
-            multiline: True
-            size_hint_x: 0.8
-            pos_hint: {"center_x": 0.5}
-        MDTextField:
-            id: category
-            hint_text: "Zona/Categoría"
-            size_hint_x: 0.8
-            pos_hint: {"center_x": 0.5}
-            on_focus: if self.focus: app.root.get_screen('storyform').open_category_menu(self)
-        MDRaisedButton:
-            text: "Publicar"
-            pos_hint: {"center_x": 0.5}
-            on_release: app.root.get_screen('storyform').publish_story()
-        MDRaisedButton:
-            text: 'Volver'
-            pos_hint: {"center_x": 0.5}
-            on_release: app.root.current = 'userpanel'
-'''
+# Eliminar la variable KV con la cadena larga
 
 class HistoryParanormalApp(MDApp):
     """
@@ -167,8 +27,28 @@ class HistoryParanormalApp(MDApp):
     Se encarga de construir la interfaz y gestionar las pantallas.
     """
     def build(self):
-        # Carga el layout KV y crea el gestor de pantallas
-        self.screen_manager = Builder.load_string(KV)
+        # Configurar tema oscuro
+        self.theme_cls.theme_style = "Dark"  # Tema oscuro
+        self.theme_cls.primary_palette = "Red"  # Color primario rojo
+        self.theme_cls.primary_hue = "900"  # Tono oscuro del rojo
+        
+        # Configuración para dispositivos móviles
+        from kivy.core.window import Window
+        from kivy.utils import platform
+        
+        # Ajustar la ventana según la plataforma
+        if platform in ('android', 'ios'):
+            # En dispositivos móviles, usar pantalla completa
+            Window.softinput_mode = 'below_target'
+        else:
+            # En escritorio, establecer un tamaño razonable
+            Window.size = (400, 700)  # Simular tamaño de móvil para pruebas
+        
+        # Título de la aplicación
+        self.title = "SOMBRAS DE CHILE"
+        
+        # Carga el archivo KV principal
+        self.screen_manager = Builder.load_file("kv/main.kv")
         # Agrega cada pantalla al gestor con su nombre único
         self.screen_manager.add_widget(MenuScreen(name='MenuScreen'))
         self.screen_manager.add_widget(RegisterScreen(name='register'))
