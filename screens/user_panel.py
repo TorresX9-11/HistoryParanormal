@@ -5,7 +5,7 @@ Permite ver todas las historias, filtrar por las propias y gestionar acciones so
 """
 
 from kivymd.uix.screen import MDScreen  # Pantalla base KivyMD
-from kivymd.uix.list import OneLineListItem, IconRightWidget  # Widgets de lista y acciones
+from kivymd.uix.list import OneLineListItem, OneLineAvatarIconListItem, IconRightWidget  # Widgets de lista y acciones
 from kivymd.uix.dialog import MDDialog  # Diálogo para mensajes
 from models.story import StoryManager   # Gestor de historias
 from models.user import SessionManager # Gestor de sesión
@@ -46,7 +46,7 @@ class UserPanelScreen(MDScreen):
         stories_list = self.ids.user_stories_list
         stories_list.clear_widgets()
         for idx, story in enumerate(user_stories):
-            item = OneLineListItem(text=f"{story['title']} - {story['category']}")
+            item = OneLineAvatarIconListItem(text=f"{story['title']} - {story['category']}")
             item.add_widget(IconRightWidget(icon="pencil", on_release=lambda x, i=idx: self.edit_story(i)))
             item.add_widget(IconRightWidget(icon="delete", on_release=lambda x, i=idx: self.delete_story(i)))
             stories_list.add_widget(item)
