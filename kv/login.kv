@@ -5,61 +5,122 @@
         Rectangle:
             pos: self.pos
             size: self.size
-    BoxLayout:
-        orientation: 'vertical'
-        padding: dp(20) if is_mobile else dp(50)
-        spacing: dp(15) if is_mobile else dp(20)
+    
+    ScrollView:
+        do_scroll_x: False
+        do_scroll_y: True
         
-        MDLabel:
-            text: 'INICIAR SESIÓN'
-            halign: 'center'
-            font_style: "H5" if is_mobile else "H4"
-            theme_text_color: "Custom"
-            text_color: 0.8, 0.1, 0.1, 1  # Rojo sangre
+        BoxLayout:
+            orientation: 'vertical'
+            padding: dp(30) if is_mobile else dp(60)
+            spacing: dp(20) if is_mobile else dp(25)
             size_hint_y: None
-            height: self.texture_size[1]
+            height: self.minimum_height
             
-        Widget:
-            size_hint_y: 0.05
+            # Spacer superior
+            Widget:
+                size_hint_y: None
+                height: dp(50)
             
-        MDTextField:
-            id: username
-            hint_text: "Nombre de usuario"
-            size_hint_x: 0.9 if is_mobile else 0.8
-            pos_hint: {"center_x": 0.5}
-            font_size: dp(16) if is_mobile else dp(14)
+            # Título de la pantalla
+            MDLabel:
+                text: 'INICIAR SESIÓN'
+                halign: 'center'
+                font_style: "H4" if is_mobile else "H3"
+                theme_text_color: "Custom"
+                text_color: 0.8, 0.1, 0.1, 1  # Rojo sangre
+                size_hint_y: None
+                height: self.texture_size[1]
+                
+            # Subtítulo
+            MDLabel:
+                text: 'Accede a tu cuenta para compartir tus experiencias'
+                halign: 'center'
+                font_style: "Body1"
+                theme_text_color: "Secondary"
+                size_hint_y: None
+                height: self.texture_size[1]
+                text_size: self.width, None
+                
+            # Spacer
+            Widget:
+                size_hint_y: None
+                height: dp(30)
+                
+            # Card contenedora del formulario
+            MDCard:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: dp(300)
+                md_bg_color: 0.1, 0.1, 0.1, 1
+                elevation: 5
+                radius: [15, 15, 15, 15]
+                padding: dp(25)
+                spacing: dp(20)
+                pos_hint: {"center_x": 0.5}
+                size_hint_x: 0.9 if is_mobile else 0.7
+                
+                # Campo de nombre de usuario
+                MDTextField:
+                    id: username
+                    hint_text: "Nombre de usuario"
+                    mode: "outlined"
+                    size_hint_y: None
+                    height: dp(60)
+                    icon_left: "account"
+                    
+                # Campo de contraseña
+                MDTextField:
+                    id: password
+                    hint_text: "Contraseña"
+                    password: True
+                    mode: "outlined"
+                    size_hint_y: None
+                    height: dp(60)
+                    icon_left: "lock"
+                    
+                # Spacer
+                Widget:
+                    size_hint_y: 0.2
+                    
+                # Botón de login
+                MDRaisedButton:
+                    text: "INICIAR SESIÓN"
+                    pos_hint: {"center_x": 0.5}
+                    size_hint_x: 0.8
+                    height: dp(50)
+                    md_bg_color: 0.8, 0.1, 0.1, 1
+                    elevation: 3
+                    on_release: app.screen_manager.get_screen('login').login_user()
+                    
+            # Spacer
+            Widget:
+                size_hint_y: None
+                height: dp(20)
+                
+            # Botones adicionales
+            BoxLayout:
+                orientation: 'vertical'
+                spacing: dp(12)
+                size_hint_y: None
+                height: dp(100)
+                
+                # Botón de registro
+                MDTextButton:
+                    text: '¿NO TIENES CUENTA? REGÍSTRATE'
+                    pos_hint: {"center_x": 0.5}
+                    theme_text_color: "Custom"
+                    text_color: 0.8, 0.1, 0.1, 1
+                    on_release: app.screen_manager.current = 'register'
+                    
+                # Botón de volver
+                MDTextButton:
+                    text: 'VOLVER AL INICIO'
+                    pos_hint: {"center_x": 0.5}
+                    theme_text_color: "Secondary"
+                    on_release: app.screen_manager.current = 'menu'
             
-        MDTextField:
-            id: password
-            hint_text: "Contraseña"
-            password: True
-            size_hint_x: 0.9 if is_mobile else 0.8
-            pos_hint: {"center_x": 0.5}
-            font_size: dp(16) if is_mobile else dp(14)
-            
-        Widget:
-            size_hint_y: 0.05
-            
-        MDRaisedButton:
-            text: "INICIAR SESIÓN"
-            pos_hint: {"center_x": 0.5}
-            size_hint_x: 0.8 if is_mobile else 0.4
-            height: dp(50) if is_mobile else dp(40)
-            md_bg_color: 0.5, 0, 0, 1  # Rojo oscuro
-            on_release: app.root.get_screen('login').login_user()
-            
-        MDRaisedButton:
-            text: '¿NO TIENES CUENTA? REGÍSTRATE'
-            pos_hint: {"center_x": 0.5}
-            adaptive_size: True
-            height: dp(50) if is_mobile else dp(40)
-            md_bg_color: 0.5, 0, 0, 1  # Rojo oscuro
-            on_release: app.root.current = 'register'
-            
-        MDRaisedButton:
-            text: 'VOLVER'
-            pos_hint: {"center_x": 0.5}
-            size_hint_x: 0.8 if is_mobile else 0.4
-            height: dp(50) if is_mobile else dp(40)
-            md_bg_color: 0.5, 0, 0, 1  # Rojo oscuro
-            on_release: app.root.current = 'MenuScreen'
+            # Spacer inferior
+            Widget:
+                size_hint_y: None
+                height: dp(50)

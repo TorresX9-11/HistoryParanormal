@@ -1,11 +1,4 @@
 #:kivy 2.0.0
-# Importaciones de clases de pantallas
-#:import MenuScreen main.MenuScreen
-#:import RegisterScreen screens.register.RegisterScreen
-#:import LoginScreen screens.login.LoginScreen
-#:import PublicScreen screens.public.PublicScreen
-#:import UserPanelScreen screens.user_panel.UserPanelScreen
-#:import StoryFormScreen screens.story_form.StoryFormScreen
 
 # Importaciones de utilidades de Kivy
 #:import Window kivy.core.window.Window
@@ -19,15 +12,5 @@
 #:include kv/menu.kv
 #:include kv/register.kv
 #:include kv/login.kv
-#:include kv/public.kv
-#:include kv/user_panel.kv
-#:include kv/story_form.kv
 
-# Gestor de pantallas principal
-MDScreenManager:
-    MenuScreen:
-    RegisterScreen:
-    LoginScreen:
-    PublicScreen:
-    UserPanelScreen:
-    StoryFormScreen:
+# El resto de pantallas se manejan programáticamente para mayor flexibilidad

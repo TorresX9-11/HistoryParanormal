@@ -7,65 +7,136 @@
             pos: self.pos
             size: self.size
     
-    # Contenedor principal vertical
-    BoxLayout:
-        orientation: 'vertical'
-        padding: dp(20) if is_mobile else dp(50)
-        spacing: dp(15) if is_mobile else dp(20)
+    ScrollView:
+        do_scroll_x: False
+        do_scroll_y: True
         
-        # Título de la pantalla
-        MDLabel:
-            text: 'REGISTRO'
-            halign: 'center'
-            font_style: "H5" if is_mobile else "H4"
-            theme_text_color: "Custom"
-            text_color: 0.8, 0.1, 0.1, 1  # Rojo sangre
+        BoxLayout:
+            orientation: 'vertical'
+            padding: dp(30) if is_mobile else dp(60)
+            spacing: dp(20) if is_mobile else dp(25)
             size_hint_y: None
-            height: self.texture_size[1]
+            height: self.minimum_height
             
-        # Campo de nombre de usuario
-        MDTextField:
-            id: username
-            hint_text: "Nombre de usuario"
-            size_hint_x: 0.9 if is_mobile else 0.8
-            pos_hint: {"center_x": 0.5}
-            font_size: dp(16) if is_mobile else dp(14)
+            # Spacer superior
+            Widget:
+                size_hint_y: None
+                height: dp(30)
             
-        # Campo de correo electrónico
-        MDTextField:
-            id: email
-            hint_text: "Correo electrónico"
-            size_hint_x: 0.9 if is_mobile else 0.8
-            pos_hint: {"center_x": 0.5}
-            font_size: dp(16) if is_mobile else dp(14)
+            # Título de la pantalla
+            MDLabel:
+                text: 'CREAR CUENTA'
+                halign: 'center'
+                font_style: "H4" if is_mobile else "H3"
+                theme_text_color: "Custom"
+                text_color: 0.8, 0.1, 0.1, 1  # Rojo sangre
+                size_hint_y: None
+                height: self.texture_size[1]
+                
+            # Subtítulo
+            MDLabel:
+                text: 'Únete a nuestra comunidad de narradores'
+                halign: 'center'
+                font_style: "Body1"
+                theme_text_color: "Secondary"
+                size_hint_y: None
+                height: self.texture_size[1]
+                text_size: self.width, None
+                
+            # Spacer
+            Widget:
+                size_hint_y: None
+                height: dp(20)
+                
+            # Card contenedora del formulario
+            MDCard:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: dp(400)
+                md_bg_color: 0.1, 0.1, 0.1, 1
+                elevation: 5
+                radius: [15, 15, 15, 15]
+                padding: dp(25)
+                spacing: dp(20)
+                pos_hint: {"center_x": 0.5}
+                size_hint_x: 0.9 if is_mobile else 0.7
+                
+                # Campo de nombre de usuario
+                MDTextField:
+                    id: username
+                    hint_text: "Nombre de usuario"
+                    mode: "outlined"
+                    size_hint_y: None
+                    height: dp(60)
+                    icon_left: "account"
+                    helper_text: "Mínimo 3 caracteres"
+                    helper_text_mode: "on_focus"
+                    
+                # Campo de correo electrónico
+                MDTextField:
+                    id: email
+                    hint_text: "Correo electrónico"
+                    mode: "outlined"
+                    size_hint_y: None
+                    height: dp(60)
+                    icon_left: "email"
+                    helper_text: "Ingresa un email válido"
+                    helper_text_mode: "on_focus"
+                    
+                # Campo de contraseña
+                MDTextField:
+                    id: password
+                    hint_text: "Contraseña"
+                    password: True
+                    mode: "outlined"
+                    size_hint_y: None
+                    height: dp(60)
+                    icon_left: "lock"
+                    helper_text: "Mínimo 6 caracteres"
+                    helper_text_mode: "on_focus"
+                    
+                # Spacer
+                Widget:
+                    size_hint_y: 0.1
+                    
+                # Botón de registro
+                MDRaisedButton:
+                    text: "CREAR CUENTA"
+                    pos_hint: {"center_x": 0.5}
+                    size_hint_x: 0.8
+                    height: dp(50)
+                    md_bg_color: 0.8, 0.1, 0.1, 1
+                    elevation: 3
+                    on_release: app.screen_manager.get_screen('register').register_user()
+                    
+            # Spacer
+            Widget:
+                size_hint_y: None
+                height: dp(20)
+                
+            # Botones adicionales
+            BoxLayout:
+                orientation: 'vertical'
+                spacing: dp(12)
+                size_hint_y: None
+                height: dp(100)
+                
+                # Botón de login
+                MDTextButton:
+                    text: '¿YA TIENES CUENTA? INICIA SESIÓN'
+                    pos_hint: {"center_x": 0.5}
+                    theme_text_color: "Custom"
+                    text_color: 0.8, 0.1, 0.1, 1
+                    on_release: app.screen_manager.current = 'login'
+                    
+                # Botón de volver
+                MDTextButton:
+                    text: 'VOLVER AL INICIO'
+                    pos_hint: {"center_x": 0.5}
+                    theme_text_color: "Secondary"
+                    on_release: app.screen_manager.current = 'menu'
             
-        # Campo de contraseña
-        MDTextField:
-            id: password
-            hint_text: "Contraseña"
-            password: True
-            size_hint_x: 0.9 if is_mobile else 0.8
-            pos_hint: {"center_x": 0.5}
-            font_size: dp(16) if is_mobile else dp(14)
-            
-        # Espacio flexible
-        Widget:
-            size_hint_y: 0.05
-            
-        # Botón para registrarse
-        MDRaisedButton:
-            text: "REGISTRARSE"
-            pos_hint: {"center_x": 0.5}
-            size_hint_x: 0.8 if is_mobile else 0.4
-            height: dp(50) if is_mobile else dp(40)
-            md_bg_color: 0.5, 0, 0, 1  # Rojo oscuro
-            on_release: app.root.get_screen('register').register_user()
-            
-        # Botón para volver
-        MDRaisedButton:
-            text: 'VOLVER'
-            pos_hint: {"center_x": 0.5}
-            size_hint_x: 0.8 if is_mobile else 0.4
-            height: dp(50) if is_mobile else dp(40)
-            md_bg_color: 0.5, 0, 0, 1  # Rojo oscuro
-            on_release: app.root.current = 'MenuScreen'
+            # Spacer inferior
+            Widget:
+                size_hint_y: None
+                height: dp(30)

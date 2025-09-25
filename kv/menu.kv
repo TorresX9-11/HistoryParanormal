@@ -12,14 +12,18 @@
         orientation: 'vertical'
         # Padding adaptativo según el dispositivo
         padding: dp(20) if is_mobile else dp(50)
-        spacing: dp(10) if is_mobile else dp(20)
+        spacing: dp(20) if is_mobile else dp(30)
+        
+        # Spacer superior
+        Widget:
+            size_hint_y: 0.1
         
         # Logo de la aplicación
         Image:
             source: 'assets/LogoApp.png'
             size_hint: None, None
             # Tamaño adaptativo según el dispositivo
-            size: dp(150) if is_mobile else dp(200), dp(150) if is_mobile else dp(200)
+            size: dp(180) if is_mobile else dp(220), dp(180) if is_mobile else dp(220)
             pos_hint: {"center_x": 0.5}
             allow_stretch: True
             keep_ratio: True
@@ -29,7 +33,7 @@
             text: 'SOMBRAS DE CHILE'
             halign: 'center'
             # Tamaño de fuente adaptativo
-            font_style: "H5" if is_mobile else "H4"
+            font_style: "H4" if is_mobile else "H3"
             theme_text_color: "Custom"
             text_color: 0.8, 0.1, 0.1, 1  # Rojo sangre
             size_hint_y: None
@@ -45,27 +49,46 @@
             text_color: 0.7, 0.7, 0.7, 1  # Gris claro
             size_hint_y: None
             height: self.texture_size[1]
+            text_size: self.width, None
             
         # Espacio flexible
         Widget:
+            size_hint_y: 0.2
+            
+        # Contenedor de botones
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: dp(15)
+            size_hint_y: None
+            height: dp(200)
+            
+            # Botón principal - Explorar
+            MDRaisedButton:
+                text: 'EXPLORAR HISTORIAS'
+                pos_hint: {"center_x": 0.5}
+                size_hint_x: 0.8 if is_mobile else 0.6
+                height: dp(50)
+                md_bg_color: 0.8, 0.1, 0.1, 1  # Rojo principal
+                elevation: 5
+                on_release: app.screen_manager.current = 'main'
+                
+            # Botón secundario - Iniciar sesión
+            MDRaisedButton:
+                text: 'INICIAR SESIÓN'
+                pos_hint: {"center_x": 0.5}
+                size_hint_x: 0.8 if is_mobile else 0.6
+                height: dp(45)
+                md_bg_color: 0.5, 0, 0, 1  # Rojo oscuro
+                on_release: app.screen_manager.current = 'login'
+                
+            # Botón terciario - Registrarse
+            MDTextButton:
+                text: '¿No tienes cuenta? Regístrate'
+                pos_hint: {"center_x": 0.5}
+                theme_text_color: "Custom"
+                text_color: 0.7, 0.7, 0.7, 1
+                on_release: app.screen_manager.current = 'register'
+        
+        # Spacer inferior
+        Widget:
             size_hint_y: 0.1
-            
-        # Botón para ver publicaciones
-        MDRaisedButton:
-            text: 'VER PUBLICACIONES'
-            pos_hint: {"center_x": 0.5}
-            # Ancho adaptativo según el dispositivo
-            adaptive_size: True
-            height: dp(50) if is_mobile else dp(40)
-            md_bg_color: 0.5, 0, 0, 1  # Rojo oscuro
-            on_release: app.root.current = 'public'
-            
-        # Botón para iniciar sesión
-        MDRaisedButton:
-            text: 'INICIAR SESIÓN'
-            pos_hint: {"center_x": 0.5}
-            # Ancho adaptativo según el dispositivo
-            size_hint_x: 0.8 if is_mobile else 0.4
-            height: dp(50) if is_mobile else dp(40)
-            md_bg_color: 0.5, 0, 0, 1  # Rojo oscuro
-            on_release: app.root.current = 'login'
