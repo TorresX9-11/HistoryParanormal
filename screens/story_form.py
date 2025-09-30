@@ -36,7 +36,7 @@ class StoryFormScreen(MDScreen):
         self.dialog = None
         self.menu = None
         self.edit_mode = False
-        self.edit_index = None
+        self.edit_story_id = None
         self.setup_ui()
     
     def setup_ui(self):
@@ -241,51 +241,44 @@ class StoryFormScreen(MDScreen):
         title = self.title_field.text.strip()
         content = self.content_field.text.strip()
         category = self.category_field.text.strip()
-        author = SessionManager.get_session()
-        
+        current_user = SessionManager.get_current_user()
+
         # Validaciones
         if not title:
             self.show_dialog('Por favor, ingresa un título para tu historia.')
             return
-        
+
         if len(title) < 5:
             self.show_dialog('El título debe tener al menos 5 caracteres.')
             return
-        
+
         if not content:
             self.show_dialog('Por favor, relata tu experiencia paranormal.')
             return
-        
+
         if len(content) < 50:
             self.show_dialog('La historia debe tener al menos 50 caracteres.')
             return
-        
+
         if not category:
             self.show_dialog('Por favor, selecciona una categoría.')
             return
-        
-        if not author:
+
+        if not current_user:
             self.show_dialog('Error de sesión. Por favor, inicia sesión nuevamente.')
             return
-        
+
         # Publicar o editar historia
-        if self.edit_mode and self.edit_index is not None:
-            stories = StoryManager.load_stories()
-            stories[self.edit_index] = {
-                'title': title,
-                'content': content,
-                'category': category,
-                'author': author
-            }
-            StoryManager.save_stories(stories)
-            self.show_dialog('Historia editada exitosamente.')
-            self.edit_mode = False
-            self.edit_index = None
-        else:
-            success, msg = StoryManager.add_story(title, content, category, author)
+        if self.edit_mode and self.edit_story_id is not None:
+            success, msg = StoryManager.update_story(self.edit_story_id, title, content, category)
             self.show_dialog(msg)
-        
-        if success or self.edit_mode:
+            self.edit_mode = False
+            self.edit_story_id = None
+        else:
+            success, msg = StoryManager.add_story(title, content, category, current_user.id)
+            self.show_dialog(msg)
+
+        if success:
             self.clear_form()
             # Regresar a la pantalla principal después de un breve delay
             from kivy.clock import Clock
@@ -318,7 +311,7 @@ class StoryFormScreen(MDScreen):
             self.dialog.text = text
         self.dialog.open()
     
-    def load_story_for_edit(self, story_data, index):
+    def load_story_for_edit(self, story_data, story_id):
         """
         Carga una historia existente para editar.
         """
@@ -326,9 +319,9 @@ class StoryFormScreen(MDScreen):
         self.content_field.text = story_data.get('content', '')
         self.category_field.text = story_data.get('category', '')
         self.edit_mode = True
-        self.edit_index = index
+        self.edit_story_id = story_id
         self.publish_button.text = "GUARDAR CAMBIOS"
-        
+
         # Actualizar título de la toolbar
-        toolbar = self.children[0].children[1]  # Acceder al toolbar
+        toolbar = self.children[0].children[1]
         toolbar.title = "Editar Historia"

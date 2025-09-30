@@ -166,44 +166,33 @@ class ExploreScreen(MDScreen):
     
     def search_stories(self, *args):
         """
-        Busca historias basándose en el texto ingresado.
+        Busca historias basándose en el texto ingresado usando Supabase.
         """
-        search_text = self.search_field.text.lower().strip()
-        
+        search_text = self.search_field.text.strip()
+
         if not search_text:
             self.load_all_stories()
             return
-        
-        stories = StoryManager.load_stories()
-        filtered_stories = []
-        
-        for story in stories:
-            # Buscar en título, contenido y autor
-            if (search_text in story.get('title', '').lower() or
-                search_text in story.get('content', '').lower() or
-                search_text in story.get('author', '').lower()):
-                filtered_stories.append(story)
-        
-        self.display_stories(filtered_stories)
+
+        stories = StoryManager.search_stories(search_text)
+        self.display_stories(stories)
     
     def filter_by_category(self, category):
         """
-        Filtra historias por categoría seleccionada.
+        Filtra historias por categoría seleccionada usando Supabase.
         """
         # Actualizar estado de chips
         for chip in self.categories_layout.children:
             if hasattr(chip, 'text'):
                 chip.check = (chip.text == category)
-        
+
         self.current_filter = category
-        
-        stories = StoryManager.load_stories()
-        
+
         if category == 'Todas':
-            filtered_stories = stories
+            filtered_stories = StoryManager.load_stories()
         else:
-            filtered_stories = [s for s in stories if s.get('category') == category]
-        
+            filtered_stories = StoryManager.get_stories_by_category(category)
+
         self.display_stories(filtered_stories)
     
     def on_enter(self, *args):

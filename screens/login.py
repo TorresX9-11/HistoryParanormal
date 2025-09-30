@@ -35,27 +35,27 @@ class LoginScreen(MDScreen):
         """
         username = self.ids.username.text.strip()
         password = self.ids.password.text
-        
+
         # Validaciones básicas
         if not username:
             self.show_dialog('Por favor, ingresa tu nombre de usuario.')
             return
-        
+
         if not password:
             self.show_dialog('Por favor, ingresa tu contraseña.')
             return
-        
-        # Validar credenciales
-        users = UserManager.load_users()
-        user = next((u for u in users if u['username'].strip() == username and u['password'] == password), None)
-        
-        if user:
-            SessionManager.save_session(username)
+
+        # Autenticar usuario con Supabase
+        success, result = UserManager.authenticate_user(username, password)
+
+        if success:
+            # Crear sesión con el ID del usuario
+            SessionManager.create_session(result.id)
             self.show_dialog('¡Login exitoso!')
             # Navegar a la pantalla principal con navegación
             App.get_running_app().screen_manager.current = 'main'
         else:
-            self.show_dialog('Usuario o contraseña incorrectos.')
+            self.show_dialog(result)
     
     def on_enter(self, *args):
         """

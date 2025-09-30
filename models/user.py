@@ -1,94 +1,215 @@
 """
 user.py
-Modelo de datos para usuario y gestión de sesión.
-Incluye clases y funciones para registrar, guardar y cargar usuarios, y gestionar la sesión activa.
+Modelo de datos para usuario y gestión de sesión con Supabase.
+Incluye clases y funciones para registrar, autenticar usuarios y gestionar sesiones.
 """
 
-import json  # Para manejo de archivos JSON
-import os    # Para rutas de archivos
-
-USERS_FILE = os.path.join(os.path.dirname(__file__), 'users.json')  # Ruta al archivo de usuarios
+import bcrypt
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from config.supabase_client import get_supabase_client
+from datetime import datetime, timedelta
 
 class User:
     """
     Representa un usuario de la app.
     """
-    def __init__(self, username, password, email):
+    def __init__(self, id, username, email, created_at=None):
+        self.id = id
         self.username = username
-        self.password = password  # En producción, usar hash
         self.email = email
+        self.created_at = created_at
 
-    def to_dict(self):
+    @staticmethod
+    def from_dict(data):
         """
-        Convierte el usuario a un diccionario para guardar en JSON.
+        Crea un usuario desde un diccionario de Supabase.
         """
-        return {
-            'username': self.username,
-            'password': self.password,
-            'email': self.email
-        }
+        return User(
+            id=data.get('id'),
+            username=data.get('username'),
+            email=data.get('email'),
+            created_at=data.get('created_at')
+        )
 
 class UserManager:
     """
-    Clase estática para gestionar usuarios: cargar, guardar y registrar.
+    Clase estática para gestionar usuarios con Supabase.
     """
     @staticmethod
-    def load_users():
+    def _hash_password(password):
         """
-        Carga la lista de usuarios desde el archivo JSON.
+        Genera un hash seguro de la contraseña usando bcrypt.
         """
-        if not os.path.exists(USERS_FILE):
-            return []
-        with open(USERS_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
+        salt = bcrypt.gensalt()
+        return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
     @staticmethod
-    def save_users(users):
+    def _verify_password(password, password_hash):
         """
-        Guarda la lista de usuarios en el archivo JSON.
+        Verifica si una contraseña coincide con su hash.
         """
-        with open(USERS_FILE, 'w', encoding='utf-8') as f:
-            json.dump(users, f, ensure_ascii=False, indent=2)
+        return bcrypt.checkpw(password.encode('utf-8'), password_hash.encode('utf-8'))
+
+    @staticmethod
+    def get_user_by_username(username):
+        """
+        Obtiene un usuario por su nombre de usuario.
+        """
+        try:
+            supabase = get_supabase_client()
+            response = supabase.table('users').select('*').eq('username', username).maybeSingle().execute()
+            if response.data:
+                return User.from_dict(response.data)
+            return None
+        except Exception as e:
+            print(f"Error al obtener usuario: {e}")
+            return None
 
     @staticmethod
     def register_user(username, password, email):
         """
-        Registra un nuevo usuario si el nombre no existe.
+        Registra un nuevo usuario en Supabase.
         """
-        users = UserManager.load_users()
-        if any(u['username'] == username for u in users):
-            return False, 'El usuario ya existe.'
-        new_user = User(username, password, email)
-        users.append(new_user.to_dict())
-        UserManager.save_users(users)
-        return True, 'Usuario registrado exitosamente.'
+        try:
+            supabase = get_supabase_client()
+
+            existing_user = supabase.table('users').select('username').eq('username', username).maybeSingle().execute()
+            if existing_user.data:
+                return False, 'El usuario ya existe.'
+
+            existing_email = supabase.table('users').select('email').eq('email', email).maybeSingle().execute()
+            if existing_email.data:
+                return False, 'El email ya está registrado.'
+
+            password_hash = UserManager._hash_password(password)
+
+            new_user = {
+                'username': username,
+                'password_hash': password_hash,
+                'email': email
+            }
+
+            response = supabase.table('users').insert(new_user).execute()
+
+            if response.data:
+                return True, 'Usuario registrado exitosamente.'
+            return False, 'Error al registrar usuario.'
+
+        except Exception as e:
+            print(f"Error en registro: {e}")
+            return False, f'Error al registrar usuario: {str(e)}'
+
+    @staticmethod
+    def authenticate_user(username, password):
+        """
+        Autentica un usuario verificando su contraseña.
+        """
+        try:
+            supabase = get_supabase_client()
+            response = supabase.table('users').select('*').eq('username', username).maybeSingle().execute()
+
+            if not response.data:
+                return False, 'Usuario no encontrado.'
+
+            user_data = response.data
+            if UserManager._verify_password(password, user_data['password_hash']):
+                return True, User.from_dict(user_data)
+            else:
+                return False, 'Contraseña incorrecta.'
+
+        except Exception as e:
+            print(f"Error en autenticación: {e}")
+            return False, f'Error al autenticar: {str(e)}'
 
 class SessionManager:
     """
-    Clase estática para gestionar la sesión activa del usuario.
+    Clase estática para gestionar sesiones con Supabase.
     """
-    SESSION_FILE = os.path.join(os.path.dirname(__file__), 'session.json')
+    _current_session = None
 
     @staticmethod
-    def save_session(username):
+    def create_session(user_id):
         """
-        Guarda el usuario actual en el archivo de sesión.
+        Crea una nueva sesión en Supabase.
         """
-        with open(SessionManager.SESSION_FILE, 'w', encoding='utf-8') as f:
-            json.dump({'username': username}, f)
+        try:
+            supabase = get_supabase_client()
+
+            SessionManager.clear_expired_sessions(user_id)
+
+            expires_at = datetime.now() + timedelta(days=7)
+
+            session_data = {
+                'user_id': user_id,
+                'expires_at': expires_at.isoformat()
+            }
+
+            response = supabase.table('sessions').insert(session_data).execute()
+
+            if response.data:
+                SessionManager._current_session = response.data[0]
+                return True
+            return False
+
+        except Exception as e:
+            print(f"Error al crear sesión: {e}")
+            return False
+
+    @staticmethod
+    def get_current_user():
+        """
+        Obtiene el usuario de la sesión actual.
+        """
+        try:
+            if SessionManager._current_session:
+                user_id = SessionManager._current_session['user_id']
+                supabase = get_supabase_client()
+                response = supabase.table('users').select('*').eq('id', user_id).maybeSingle().execute()
+
+                if response.data:
+                    return User.from_dict(response.data)
+            return None
+
+        except Exception as e:
+            print(f"Error al obtener usuario actual: {e}")
+            return None
+
+    @staticmethod
+    def clear_session():
+        """
+        Elimina la sesión actual.
+        """
+        try:
+            if SessionManager._current_session:
+                supabase = get_supabase_client()
+                session_id = SessionManager._current_session['id']
+                supabase.table('sessions').delete().eq('id', session_id).execute()
+                SessionManager._current_session = None
+            return True
+
+        except Exception as e:
+            print(f"Error al limpiar sesión: {e}")
+            return False
+
+    @staticmethod
+    def clear_expired_sessions(user_id):
+        """
+        Elimina sesiones expiradas del usuario.
+        """
+        try:
+            supabase = get_supabase_client()
+            now = datetime.now().isoformat()
+            supabase.table('sessions').delete().eq('user_id', user_id).lt('expires_at', now).execute()
+
+        except Exception as e:
+            print(f"Error al limpiar sesiones expiradas: {e}")
 
     @staticmethod
     def get_session():
         """
-        Obtiene el usuario actual de la sesión guardada.
+        Obtiene el username de la sesión actual (compatibilidad).
         """
-        if not os.path.exists(SessionManager.SESSION_FILE):
-            return None
-        with open(SessionManager.SESSION_FILE, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            return data.get('username')
-
-    @staticmethod
-    def clear_session():
-        if os.path.exists(SessionManager.SESSION_FILE):
-            os.remove(SessionManager.SESSION_FILE)
+        user = SessionManager.get_current_user()
+        return user.username if user else None

@@ -16,12 +16,16 @@ Una aplicación móvil desarrollada en Python con Kivy/KivyMD para compartir exp
 ```
 sombras-de-chile/
 ├── main.py                 # Punto de entrada principal
+├── requirements.txt        # Dependencias del proyecto
+├── .env                    # Variables de entorno (Supabase)
+├── config/                 # Configuración
+│   └── supabase_client.py # Cliente singleton de Supabase
 ├── models/                 # Modelos de datos
-│   ├── user.py            # Gestión de usuarios y sesiones
-│   ├── story.py           # Gestión de historias
-│   ├── users.json         # Base de datos de usuarios
-│   ├── stories.json       # Base de datos de historias
-│   └── session.json       # Sesión activa
+│   ├── user.py            # Gestión de usuarios y sesiones con Supabase
+│   ├── story.py           # Gestión de historias con Supabase
+│   ├── users.json         # DEPRECATED - migrado a Supabase
+│   ├── stories.json       # DEPRECATED - migrado a Supabase
+│   └── session.json       # DEPRECATED - migrado a Supabase
 ├── screens/               # Pantallas de la aplicación
 │   ├── home.py           # Pantalla principal con historias
 │   ├── explore.py        # Exploración y búsqueda
@@ -48,8 +52,29 @@ sombras-de-chile/
 python --version
 
 # Instalar dependencias
-pip install kivy kivymd
+pip install -r requirements.txt
 ```
+
+Las dependencias incluyen:
+- kivy >= 2.1.0
+- kivymd >= 1.1.1
+- supabase >= 2.0.0
+- bcrypt >= 4.0.0
+- python-dotenv >= 1.0.0
+
+### Configuración de Base de Datos
+
+El proyecto utiliza Supabase como base de datos. Las credenciales ya están configuradas en el archivo `.env`:
+
+```
+VITE_SUPABASE_URL=https://dgahoefxebndkoxuinpc.supabase.co
+VITE_SUPABASE_SUPABASE_ANON_KEY=<tu-clave-anon>
+```
+
+La migración inicial de la base de datos ya fue aplicada, creando las siguientes tablas:
+- `users`: Usuarios con contraseñas hasheadas
+- `stories`: Historias paranormales
+- `sessions`: Sesiones de usuarios
 
 ### Ejecución
 
@@ -128,29 +153,39 @@ Navegación por pestañas con tres secciones principales:
 
 ## 🔧 Modelos de Datos
 
-### Usuario (`User`)
-```python
+### Esquema de Base de Datos (Supabase)
+
+#### Tabla `users`
+```sql
 {
-    "username": str,    # Nombre único del usuario
-    "password": str,    # Contraseña (en producción usar hash)
-    "email": str        # Email válido
+    "id": uuid (PK),           # Identificador único
+    "username": text (UNIQUE), # Nombre único del usuario
+    "password_hash": text,     # Hash bcrypt de la contraseña
+    "email": text (UNIQUE),    # Email válido
+    "created_at": timestamptz  # Fecha de registro
 }
 ```
 
-### Historia (`Story`)
-```python
+#### Tabla `stories`
+```sql
 {
-    "title": str,       # Título de la historia
-    "content": str,     # Contenido completo
-    "category": str,    # Categoría seleccionada
-    "author": str       # Autor (username)
+    "id": uuid (PK),           # Identificador único
+    "title": text,             # Título de la historia
+    "content": text,           # Contenido completo
+    "category": text,          # Categoría seleccionada
+    "author_id": uuid (FK),    # Referencia al usuario autor
+    "created_at": timestamptz, # Fecha de publicación
+    "updated_at": timestamptz  # Fecha de última actualización
 }
 ```
 
-### Sesión (`Session`)
-```python
+#### Tabla `sessions`
+```sql
 {
-    "username": str     # Usuario actualmente logueado
+    "id": uuid (PK),           # Identificador único
+    "user_id": uuid (FK),      # Referencia al usuario
+    "created_at": timestamptz, # Fecha de inicio
+    "expires_at": timestamptz  # Fecha de expiración (7 días)
 }
 ```
 
@@ -171,17 +206,23 @@ Card de perfil con:
 
 ## 📊 Gestión de Estado
 
-- **Persistencia**: Archivos JSON para datos locales
-- **Sesiones**: Gestión automática de login/logout
+- **Persistencia**: Supabase PostgreSQL para almacenamiento en la nube
+- **Sesiones**: Gestión automática con expiración de 7 días
 - **Validaciones**: Validación en tiempo real en formularios
 - **Navegación**: Stack de pantallas con historial
+- **Seguridad**: RLS (Row Level Security) en todas las operaciones
 
 ## 🔒 Seguridad
 
 - Validación de entrada en todos los formularios
 - Sanitización de datos antes del almacenamiento
-- Gestión segura de sesiones
+- Gestión segura de sesiones con Supabase
 - Validación de formato de email con regex
+- Contraseñas hasheadas con bcrypt
+- Row Level Security (RLS) habilitado en todas las tablas
+- Políticas restrictivas por defecto
+- Los usuarios solo pueden modificar sus propios datos
+- Las historias son públicas para lectura, privadas para edición
 
 ## 🚀 Mejoras Futuras
 
